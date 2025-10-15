@@ -77,7 +77,7 @@ export default function Funcionario() {
       `)
       .order("created_at", { ascending: false });
 
-    if (filtroStatus) {
+    if (filtroStatus && filtroStatus !== 'todos') {
       query = query.eq("status", filtroStatus);
     }
 
@@ -275,7 +275,7 @@ export default function Funcionario() {
                 <SelectValue placeholder="Filtrar por status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="Aberto">Aberto</SelectItem>
                 <SelectItem value="Em andamento">Em andamento</SelectItem>
                 <SelectItem value="Concluído">Concluído</SelectItem>
