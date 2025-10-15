@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import ChamadoDetalhes from "./pages/ChamadoDetalhes";
 import Funcionario from "./pages/Funcionario";
+import CriarFuncionario from "./pages/CriarFuncionario";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chamado/:id" element={<ChamadoDetalhes />} />
         <Route path="/funcionario" element={<Funcionario />} />
+        <Route path="/criar-funcionario" element={<CriarFuncionario />} />
         <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -2,3 +2,6 @@ project_id = "rhdqttmvadpechofprhq"
 
 [functions.faq-ia]
 verify_jwt = false
+
+[functions.criar-funcionario]
+verify_jwt = false

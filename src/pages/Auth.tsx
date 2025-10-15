@@ -19,20 +19,39 @@ export default function Auth() {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/dashboard");
-      }
-    });
+    checkSessionAndRedirect();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/dashboard");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session && event === 'SIGNED_IN') {
+        await checkSessionAndRedirect();
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkSessionAndRedirect = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Buscar perfil do usuário para saber se é funcionário ou aluno
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("papel")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profile) {
+        if (profile.papel === 'funcionario') {
+          navigate("/funcionario");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        navigate("/dashboard");
+      }
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
