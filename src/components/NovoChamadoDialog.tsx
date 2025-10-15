@@ -34,7 +34,6 @@ export function NovoChamadoDialog() {
     categoriaId: "",
     titulo: "",
     descricao: "",
-    prioridade: "Média",
   });
   const { toast } = useToast();
 
@@ -79,6 +78,18 @@ export function NovoChamadoDialog() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // Calcular prioridade automaticamente
+      const textoCompleto = `${formData.titulo}\n${formData.descricao}`.toLowerCase();
+      let prioridade = "Baixa";
+      
+      const urgente = ['urgente', 'emergência', 'emergencia', 'crítico', 'critico', 'parado', 'travado', 'não consigo acessar', 'nao consigo acessar'];
+      const alta = ['importante', 'preciso urgente', 'problema grave', 'não funciona', 'nao funciona', 'erro crítico', 'erro critico'];
+      const media = ['dúvida', 'duvida', 'ajuda', 'problema', 'erro', 'bug'];
+      
+      if (urgente.some(palavra => textoCompleto.includes(palavra))) prioridade = 'Urgente';
+      else if (alta.some(palavra => textoCompleto.includes(palavra))) prioridade = 'Alta';
+      else if (media.some(palavra => textoCompleto.includes(palavra))) prioridade = 'Média';
+
       const { error } = await supabase.from("chamados").insert({
         usuario_id: user.id,
         nome_aluno: formData.nomeAluno,
@@ -88,7 +99,7 @@ export function NovoChamadoDialog() {
         categoria_id: formData.categoriaId || null,
         titulo: formData.titulo,
         descricao: formData.descricao,
-        prioridade: formData.prioridade,
+        prioridade,
       });
 
       if (error) throw error;
@@ -106,7 +117,6 @@ export function NovoChamadoDialog() {
         categoriaId: "",
         titulo: "",
         descricao: "",
-        prioridade: "Média",
       });
       setOpen(false);
     } catch (error: any) {
@@ -187,46 +197,25 @@ export function NovoChamadoDialog() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="categoria">Categoria</Label>
-              <Select
-                value={formData.categoriaId}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, categoriaId: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categorias.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="prioridade">Prioridade *</Label>
-              <Select
-                value={formData.prioridade}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, prioridade: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Baixa">Baixa</SelectItem>
-                  <SelectItem value="Média">Média</SelectItem>
-                  <SelectItem value="Alta">Alta</SelectItem>
-                  <SelectItem value="Urgente">Urgente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="categoria">Categoria</Label>
+            <Select
+              value={formData.categoriaId}
+              onValueChange={(value) =>
+                setFormData({ ...formData, categoriaId: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {categorias.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

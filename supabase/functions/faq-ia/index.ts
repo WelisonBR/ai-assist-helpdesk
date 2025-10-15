@@ -32,6 +32,22 @@ serve(async (req) => {
 
     const contextoFaq = faqs?.map(f => `P: ${f.pergunta}\nR: ${f.resposta}`).join('\n\n') || '';
 
+    // Calcular prioridade baseado no conteúdo
+    const calcularPrioridade = (texto: string): string => {
+      const textoLower = texto.toLowerCase();
+      
+      // Palavras-chave que indicam urgência
+      const urgente = ['urgente', 'emergência', 'emergencia', 'crítico', 'critico', 'parado', 'travado', 'não consigo acessar', 'nao consigo acessar'];
+      const alta = ['importante', 'preciso urgente', 'problema grave', 'não funciona', 'nao funciona', 'erro crítico', 'erro critico'];
+      const media = ['dúvida', 'duvida', 'ajuda', 'problema', 'erro', 'bug'];
+      
+      if (urgente.some(palavra => textoLower.includes(palavra))) return 'Urgente';
+      if (alta.some(palavra => textoLower.includes(palavra))) return 'Alta';
+      if (media.some(palavra => textoLower.includes(palavra))) return 'Média';
+      
+      return 'Baixa';
+    };
+
     const systemPrompt = `Você é um assistente de suporte técnico especializado. 
 Sua função é ajudar usuários com problemas técnicos de TI de forma clara e objetiva.
 
@@ -80,11 +96,12 @@ Diretrizes:
 
     const data = await response.json();
     const resposta = data.choices?.[0]?.message?.content;
+    const prioridade = calcularPrioridade(pergunta);
 
     console.log('Resposta gerada com sucesso');
 
     return new Response(
-      JSON.stringify({ resposta }),
+      JSON.stringify({ resposta, prioridade }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 

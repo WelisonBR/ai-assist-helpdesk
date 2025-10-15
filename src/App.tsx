@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import ChamadoDetalhes from "./pages/ChamadoDetalhes";
+import Funcionario from "./pages/Funcionario";
 
 const queryClient = new QueryClient();
 
@@ -20,9 +21,10 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/chamado/:id" element={<ChamadoDetalhes />} />
-          <Route path="*" element={<NotFound />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/chamado/:id" element={<ChamadoDetalhes />} />
+        <Route path="/funcionario" element={<Funcionario />} />
+        <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

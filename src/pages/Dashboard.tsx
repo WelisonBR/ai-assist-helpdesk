@@ -38,11 +38,16 @@ export default function Dashboard() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("nome, setor")
+        .select("nome, setor, papel")
         .eq("id", session.user.id)
         .single();
 
       if (profile) {
+        // Redirecionar funcionários para o painel deles
+        if (profile.papel === 'funcionario') {
+          navigate("/funcionario");
+          return;
+        }
         setUserName(profile.nome);
         setUserSetor(profile.setor || "TI");
       }
