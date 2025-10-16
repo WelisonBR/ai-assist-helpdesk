@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Bot, Loader2 } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -114,6 +114,47 @@ export default function ChamadoDetalhes() {
     }
   };
 
+  const deletarChamado = async () => {
+    if (!chamado || !id) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para deletar o chamado.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from("chamados")
+        .delete()
+        .eq("id", id)
+        .eq("usuario_id", user.id);
+      
+      if (error) {
+        console.error("Erro ao deletar chamado:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Chamado deletado",
+        description: "Seu chamado foi deletado com sucesso.",
+      });
+      
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Erro detalhado:", error);
+      toast({
+        title: "Erro ao deletar chamado",
+        description: error.message || "Não foi possível deletar o chamado.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   if (loading) {
     return (
@@ -197,24 +238,34 @@ export default function ChamadoDetalhes() {
             </div>
 
             <div className="pt-4 border-t space-y-4">
-              <Button
-                onClick={consultarIA}
-                disabled={loadingIA || chamado.status === 'Concluído'}
-                variant="outline"
-                className="w-full"
-              >
-                {loadingIA ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Consultando IA...
-                  </>
-                ) : (
-                  <>
-                    <Bot className="mr-2 h-4 w-4" />
-                    Consultar IA
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={consultarIA}
+                  disabled={loadingIA || chamado.status === 'Concluído'}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  {loadingIA ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Consultando IA...
+                    </>
+                  ) : (
+                    <>
+                      <Bot className="mr-2 h-4 w-4" />
+                      Consultar IA
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={deletarChamado}
+                  disabled={chamado.status === 'Concluído'}
+                  variant="destructive"
+                  size="icon"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
 
               {respostaIA && chamado.status !== 'Concluído' && (
                 <div className="space-y-4">
@@ -244,6 +295,14 @@ export default function ChamadoDetalhes() {
                               return;
                             }
 
+                            // Adicionar também uma resposta na tabela respostas
+                            await supabase.from("respostas").insert({
+                              chamado_id: id,
+                              usuario_id: user.id,
+                              mensagem: "Problema resolvido com a ajuda da IA",
+                              is_ia: false,
+                            });
+
                             const { error } = await supabase
                               .from("chamados")
                               .update({ status: "Concluído" })
@@ -260,7 +319,7 @@ export default function ChamadoDetalhes() {
                               description: "Seu chamado foi marcado como concluído.",
                             });
                             
-                            fetchChamado();
+                            await fetchChamado();
                             setRespostaIA("");
                           } catch (error: any) {
                             console.error("Erro detalhado:", error);
