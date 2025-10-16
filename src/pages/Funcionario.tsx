@@ -68,21 +68,44 @@ export default function Funcionario() {
   };
 
   const fetchChamados = async () => {
-    let query = supabase
-      .from("chamados")
-      .select(`
-        *,
-        categorias (nome),
-        profiles (nome)
-      `)
-      .order("created_at", { ascending: false });
+    try {
+      let query = supabase
+        .from("chamados")
+        .select(`
+          *,
+          categorias (nome),
+          profiles (nome)
+        `)
+        .order("created_at", { ascending: false });
 
-    if (filtroStatus && filtroStatus !== 'todos') {
-      query = query.eq("status", filtroStatus);
+      if (filtroStatus && filtroStatus !== 'todos') {
+        query = query.eq("status", filtroStatus);
+      }
+
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error("Erro ao buscar chamados:", error);
+        toast({
+          title: "Erro ao carregar chamados",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (data) {
+        console.log("Chamados carregados:", data.length);
+        setChamados(data);
+      }
+    } catch (error: any) {
+      console.error("Erro ao buscar chamados:", error);
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
     }
-
-    const { data } = await query;
-    if (data) setChamados(data);
   };
 
   const fetchRespostas = async (chamadoId: string) => {

@@ -234,12 +234,26 @@ export default function ChamadoDetalhes() {
                       <Button
                         onClick={async () => {
                           try {
+                            const { data: { user } } = await supabase.auth.getUser();
+                            if (!user) {
+                              toast({
+                                title: "Erro de autenticação",
+                                description: "Você precisa estar logado para concluir o chamado.",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+
                             const { error } = await supabase
                               .from("chamados")
                               .update({ status: "Concluído" })
-                              .eq("id", id);
+                              .eq("id", id)
+                              .eq("usuario_id", user.id);
                             
-                            if (error) throw error;
+                            if (error) {
+                              console.error("Erro ao concluir chamado:", error);
+                              throw error;
+                            }
                             
                             toast({
                               title: "Chamado concluído",
@@ -249,9 +263,10 @@ export default function ChamadoDetalhes() {
                             fetchChamado();
                             setRespostaIA("");
                           } catch (error: any) {
+                            console.error("Erro detalhado:", error);
                             toast({
-                              title: "Erro",
-                              description: error.message,
+                              title: "Erro ao concluir chamado",
+                              description: error.message || "Não foi possível concluir o chamado.",
                               variant: "destructive",
                             });
                           }
