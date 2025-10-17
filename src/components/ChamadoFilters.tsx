@@ -42,8 +42,8 @@ export function ChamadoFilters({ filters, onFiltersChange, onClose }: ChamadoFil
 
   const handleReset = () => {
     onFiltersChange({
-      status: "",
-      categoria: "",
+      status: "todos",
+      categoria: "todas",
       dataInicio: "",
       dataFim: "",
     });
@@ -70,7 +70,7 @@ export function ChamadoFilters({ filters, onFiltersChange, onClose }: ChamadoFil
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="todos">Todos</SelectItem>
               <SelectItem value="Aberto">Aberto</SelectItem>
               <SelectItem value="Em andamento">Em andamento</SelectItem>
               <SelectItem value="Aguardando resposta">Aguardando resposta</SelectItem>
@@ -92,7 +92,7 @@ export function ChamadoFilters({ filters, onFiltersChange, onClose }: ChamadoFil
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas</SelectItem>
+              <SelectItem value="todas">Todas</SelectItem>
               {categorias.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.nome}

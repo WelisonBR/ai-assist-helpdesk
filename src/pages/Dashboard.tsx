@@ -19,8 +19,8 @@ export default function Dashboard() {
   const [userSetor, setUserSetor] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    status: "",
-    categoria: "",
+    status: "todos",
+    categoria: "todas",
     dataInicio: "",
     dataFim: "",
   });

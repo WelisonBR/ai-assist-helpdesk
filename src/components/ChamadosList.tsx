@@ -69,11 +69,11 @@ export function ChamadosList({ filters }: ChamadosListProps) {
         .eq("usuario_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (filters.status) {
+      if (filters.status && filters.status !== 'todos') {
         query = query.eq("status", filters.status);
       }
 
-      if (filters.categoria) {
+      if (filters.categoria && filters.categoria !== 'todas') {
         query = query.eq("categoria_id", filters.categoria);
       }
 
@@ -220,7 +220,7 @@ export function ChamadosList({ filters }: ChamadosListProps) {
                   variant="ghost"
                   size="icon"
                   onClick={(e) => deletarChamado(e, chamado.id)}
-                  disabled={chamado.status === 'Concluído'}
+                  disabled={chamado.status === 'Resolvido' || chamado.status === 'Fechado'}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
