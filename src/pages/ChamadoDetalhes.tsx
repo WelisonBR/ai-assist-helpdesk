@@ -72,16 +72,31 @@ export default function ChamadoDetalhes() {
   };
 
   const fetchRespostas = async () => {
-    const { data } = await supabase
-      .from("respostas")
-      .select(`
-        *,
-        profiles (nome)
-      `)
-      .eq("chamado_id", id)
-      .order("created_at", { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from("respostas")
+        .select(`
+          *,
+          profiles (nome)
+        `)
+        .eq("chamado_id", id)
+        .order("created_at", { ascending: true });
 
-    if (data) setRespostas(data);
+      if (error) {
+        console.error("Erro ao buscar respostas:", error);
+        toast({
+          title: "Erro ao carregar respostas",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Respostas carregadas:", data);
+      if (data) setRespostas(data);
+    } catch (error: any) {
+      console.error("Erro ao buscar respostas:", error);
+    }
   };
 
   const consultarIA = async () => {
