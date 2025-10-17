@@ -241,7 +241,7 @@ export default function ChamadoDetalhes() {
               <div className="flex gap-2">
                 <Button
                   onClick={consultarIA}
-                  disabled={loadingIA || chamado.status === 'Concluído'}
+                  disabled={loadingIA || chamado.status === 'Resolvido' || chamado.status === 'Fechado'}
                   variant="outline"
                   className="flex-1"
                 >
@@ -259,7 +259,7 @@ export default function ChamadoDetalhes() {
                 </Button>
                 <Button
                   onClick={deletarChamado}
-                  disabled={chamado.status === 'Concluído'}
+                  disabled={chamado.status === 'Resolvido' || chamado.status === 'Fechado'}
                   variant="destructive"
                   size="icon"
                 >
@@ -267,7 +267,7 @@ export default function ChamadoDetalhes() {
                 </Button>
               </div>
 
-              {respostaIA && chamado.status !== 'Concluído' && (
+              {respostaIA && chamado.status !== 'Resolvido' && chamado.status !== 'Fechado' && (
                 <div className="space-y-4">
                   <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-md border border-blue-200 dark:border-blue-800">
                     <div className="flex items-start gap-2 mb-2">
@@ -305,7 +305,7 @@ export default function ChamadoDetalhes() {
 
                             const { error } = await supabase
                               .from("chamados")
-                              .update({ status: "Concluído" })
+                              .update({ status: "Resolvido" })
                               .eq("id", id)
                               .eq("usuario_id", user.id);
                             
@@ -315,8 +315,8 @@ export default function ChamadoDetalhes() {
                             }
                             
                             toast({
-                              title: "Chamado concluído",
-                              description: "Seu chamado foi marcado como concluído.",
+                              title: "Chamado resolvido",
+                              description: "Seu chamado foi marcado como resolvido.",
                             });
                             
                             await fetchChamado();

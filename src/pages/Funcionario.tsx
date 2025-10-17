@@ -73,8 +73,7 @@ export default function Funcionario() {
         .from("chamados")
         .select(`
           *,
-          categorias (nome),
-          profiles (nome)
+          categorias (nome)
         `)
         .order("created_at", { ascending: false });
 
@@ -195,18 +194,18 @@ export default function Funcionario() {
     try {
       const { error } = await supabase
         .from("chamados")
-        .update({ status: "Concluído" })
+        .update({ status: "Resolvido" })
         .eq("id", chamadoSelecionado.id);
 
       if (error) throw error;
 
       toast({
-        title: "Chamado concluído",
-        description: "O chamado foi marcado como concluído.",
+        title: "Chamado resolvido",
+        description: "O chamado foi marcado como resolvido.",
       });
 
       fetchChamados();
-      setChamadoSelecionado({ ...chamadoSelecionado, status: "Concluído" });
+      setChamadoSelecionado({ ...chamadoSelecionado, status: "Resolvido" });
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -301,7 +300,9 @@ export default function Funcionario() {
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="Aberto">Aberto</SelectItem>
                 <SelectItem value="Em andamento">Em andamento</SelectItem>
-                <SelectItem value="Concluído">Concluído</SelectItem>
+                <SelectItem value="Aguardando resposta">Aguardando resposta</SelectItem>
+                <SelectItem value="Resolvido">Resolvido</SelectItem>
+                <SelectItem value="Fechado">Fechado</SelectItem>
               </SelectContent>
             </Select>
           </header>
@@ -383,9 +384,9 @@ export default function Funcionario() {
                         </div>
                       </div>
                       
-                      {chamadoSelecionado.status !== 'Concluído' && (
+                      {chamadoSelecionado.status !== 'Resolvido' && chamadoSelecionado.status !== 'Fechado' && (
                         <Button onClick={concluirChamado} variant="outline" className="w-full">
-                          Marcar como Concluído
+                          Marcar como Resolvido
                         </Button>
                       )}
                     </CardContent>
@@ -419,7 +420,7 @@ export default function Funcionario() {
                         </div>
                       )}
                       
-                      {chamadoSelecionado.status !== 'Concluído' && (
+                      {chamadoSelecionado.status !== 'Resolvido' && chamadoSelecionado.status !== 'Fechado' && (
                         <>
                           <Textarea
                             value={resposta}
