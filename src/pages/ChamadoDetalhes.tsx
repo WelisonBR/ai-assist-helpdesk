@@ -75,10 +75,7 @@ export default function ChamadoDetalhes() {
     try {
       const { data, error } = await supabase
         .from("respostas")
-        .select(`
-          *,
-          profiles (nome)
-        `)
+        .select("*")
         .eq("chamado_id", id)
         .order("created_at", { ascending: true });
 
@@ -92,8 +89,26 @@ export default function ChamadoDetalhes() {
         return;
       }
 
-      console.log("Respostas carregadas:", data);
-      if (data) setRespostas(data);
+      // Buscar nomes dos usuários separadamente
+      if (data && data.length > 0) {
+        const userIds = [...new Set(data.map(r => r.usuario_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, nome")
+          .in("id", userIds);
+
+        const profilesMap = new Map(profiles?.map(p => [p.id, p.nome]) || []);
+        
+        const respostasComNomes = data.map(resposta => ({
+          ...resposta,
+          profiles: { nome: profilesMap.get(resposta.usuario_id) || "Sistema" }
+        }));
+
+        console.log("Respostas carregadas:", respostasComNomes);
+        setRespostas(respostasComNomes);
+      } else {
+        setRespostas([]);
+      }
     } catch (error: any) {
       console.error("Erro ao buscar respostas:", error);
     }

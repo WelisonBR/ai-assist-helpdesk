@@ -110,14 +110,28 @@ export default function Funcionario() {
   const fetchRespostas = async (chamadoId: string) => {
     const { data } = await supabase
       .from("respostas")
-      .select(`
-        *,
-        profiles (nome)
-      `)
+      .select("*")
       .eq("chamado_id", chamadoId)
       .order("created_at", { ascending: true });
 
-    if (data) setRespostas(data);
+    if (data && data.length > 0) {
+      const userIds = [...new Set(data.map(r => r.usuario_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, nome")
+        .in("id", userIds);
+
+      const profilesMap = new Map(profiles?.map(p => [p.id, p.nome]) || []);
+      
+      const respostasComNomes = data.map(resposta => ({
+        ...resposta,
+        profiles: { nome: profilesMap.get(resposta.usuario_id) || "Sistema" }
+      }));
+
+      setRespostas(respostasComNomes);
+    } else {
+      setRespostas([]);
+    }
   };
 
   const selecionarChamado = async (chamado: any) => {
