@@ -3,11 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Bot, Loader2, Trash2 } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, Trash2, Send } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -20,6 +20,8 @@ export default function ChamadoDetalhes() {
   const [loading, setLoading] = useState(true);
   const [loadingIA, setLoadingIA] = useState(false);
   const [respostaIA, setRespostaIA] = useState("");
+  const [mensagemResposta, setMensagemResposta] = useState("");
+  const [enviandoResposta, setEnviandoResposta] = useState(false);
 
   useEffect(() => {
     fetchChamado();
@@ -141,6 +143,65 @@ export default function ChamadoDetalhes() {
       });
     } finally {
       setLoadingIA(false);
+    }
+  };
+
+  const enviarResposta = async () => {
+    if (!mensagemResposta.trim()) {
+      toast({
+        title: "Atenção",
+        description: "Digite uma mensagem antes de enviar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setEnviandoResposta(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para responder.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase.from("respostas").insert({
+        chamado_id: id,
+        usuario_id: user.id,
+        mensagem: mensagemResposta,
+        is_ia: false,
+      });
+
+      if (error) throw error;
+
+      // Atualizar status do chamado para "Aguardando resposta" se ainda estiver "Aberto"
+      if (chamado?.status === "Aberto") {
+        await supabase
+          .from("chamados")
+          .update({ status: "Aguardando resposta" })
+          .eq("id", id);
+      }
+
+      toast({
+        title: "Resposta enviada",
+        description: "Sua resposta foi enviada com sucesso.",
+      });
+
+      setMensagemResposta("");
+      await fetchRespostas();
+      await fetchChamado();
+    } catch (error: any) {
+      console.error("Erro ao enviar resposta:", error);
+      toast({
+        title: "Erro ao enviar resposta",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setEnviandoResposta(false);
     }
   };
 
@@ -411,6 +472,35 @@ export default function ChamadoDetalhes() {
               <p className="text-sm text-muted-foreground text-center py-4">
                 Nenhuma resposta ainda. Use a IA ou aguarde resposta de um funcionário.
               </p>
+            )}
+
+            {chamado?.status !== 'Resolvido' && chamado?.status !== 'Fechado' && (
+              <div className="pt-4 border-t space-y-3">
+                <Textarea
+                  value={mensagemResposta}
+                  onChange={(e) => setMensagemResposta(e.target.value)}
+                  placeholder="Digite sua resposta..."
+                  rows={3}
+                  className="resize-none"
+                />
+                <Button 
+                  onClick={enviarResposta} 
+                  disabled={enviandoResposta || !mensagemResposta.trim()}
+                  className="w-full"
+                >
+                  {enviandoResposta ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" />
+                      Enviar Resposta
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
