@@ -16,7 +16,7 @@ import { NovoChamadoDialog } from "@/components/NovoChamadoDialog";
 
 export default function Dashboard() {
   const [userName, setUserName] = useState("");
-  const [userSetor, setUserSetor] = useState("");
+  const [userCurso, setUserCurso] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     status: "todos",
@@ -38,7 +38,7 @@ export default function Dashboard() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("nome, setor, papel")
+        .select("nome, curso, papel")
         .eq("id", session.user.id)
         .single();
 
@@ -49,7 +49,7 @@ export default function Dashboard() {
           return;
         }
         setUserName(profile.nome);
-        setUserSetor(profile.setor || "TI");
+        setUserCurso(profile.curso || "Não informado");
       }
     };
 
@@ -88,7 +88,7 @@ export default function Dashboard() {
         <div className="w-60 bg-primary text-primary-foreground flex flex-col">
           <div className="p-6">
             <h2 className="font-semibold text-lg">{userName}</h2>
-            <p className="text-sm opacity-90">{userSetor}</p>
+            <p className="text-sm opacity-90">{userCurso}</p>
           </div>
 
           <nav className="flex-1 px-3">

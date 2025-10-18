@@ -14,7 +14,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
-  const [setor, setSetor] = useState("");
+  const [curso, setCurso] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -77,7 +77,7 @@ export default function Auth() {
           options: {
             data: {
               nome: nome,
-              setor: setor,
+              curso: curso,
             },
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -131,13 +131,13 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="setor">Setor</Label>
+                  <Label htmlFor="curso">Curso</Label>
                   <Input
-                    id="setor"
+                    id="curso"
                     type="text"
-                    value={setor}
-                    onChange={(e) => setSetor(e.target.value)}
-                    placeholder="Ex: TI, RH, Financeiro"
+                    value={curso}
+                    onChange={(e) => setCurso(e.target.value)}
+                    placeholder="Ex: Engenharia, Administração, Medicina"
                   />
                 </div>
               </>
